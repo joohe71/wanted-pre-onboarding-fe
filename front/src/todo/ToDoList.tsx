@@ -1,20 +1,50 @@
 import React from "react";
-import { ToDoProps } from "./ToDo";
+import { ToDoData, ToDoProps } from "./ToDo";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import * as Api from "../api/Api";
 
-const ToDoList = ({ todos, handleDelete, handleEditClick }: ToDoProps) => {
+interface ToDoStyle {
+  todoData: ToDoData;
+}
+
+const ToDoList = ({
+  todos,
+  handleDelete,
+  handleEditClick,
+  handleEdit,
+}: ToDoProps) => {
   const navigate = useNavigate();
+
+  const handleChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    data: ToDoData
+  ) => {
+    const res = await Api.put(`todos/${e.currentTarget.id}`, {
+      todo: data?.todo,
+      isCompleted: e.target.checked,
+    });
+    await handleEdit(res.data);
+  };
+
   return (
     <React.Fragment>
-      {todos.map((todo, index) => (
+      {todos.length === 0 && "할일이 없습니다. 할 일을 추가해주세요"}
+      {todos?.map((value, index) => (
         <Group key={`todo-${index}`}>
-          <Li key={`todo-${index}`} onClick={() => navigate(`/${todo.id}`)}>
-            {todo.title}
+          <Li key={`todo-${index}`}>
+            <input
+              id={String(value.id)}
+              name="isCompleted"
+              type="checkbox"
+              checked={value.isCompleted && true}
+              onChange={(e) => handleChange(e, value)}
+            />
+            <Span todoData={value}>{value.todo}</Span>
           </Li>
           <ButtonGroup>
-            <Button onClick={() => handleEditClick(todo)}>수정</Button>
-            <Button onClick={() => handleDelete(todo)}>삭제</Button>
+            <Button onClick={() => handleEditClick(value)}>수정</Button>
+            <Button onClick={() => handleDelete(value)}>삭제</Button>
           </ButtonGroup>
         </Group>
       ))}
@@ -51,6 +81,10 @@ const Li = styled.li`
   width: 70%;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const Span = styled.span<ToDoStyle>`
+  text-decoration: ${(props) => props.todoData?.isCompleted && "line-through"};
 `;
 
 export default ToDoList;

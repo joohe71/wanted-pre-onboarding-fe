@@ -2,10 +2,11 @@ import * as Api from "../api/Api";
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import { ToDoData } from "./ToDo";
+import { ButtonGroup, Form } from "./ToDoAddForm";
 
 interface ToDoEditFormProps {
   handleEditClick: (item?: ToDoData) => void;
-  handleEdit: (title: string, content: string, id: string) => void;
+  handleEdit: (data: ToDoData) => void;
   isEditData: ToDoData;
 }
 
@@ -14,58 +15,49 @@ const ToDoEditForm = ({
   handleEdit,
   handleEditClick,
 }: ToDoEditFormProps) => {
-  const [editData, setEditData] = React.useState({
-    title: "",
-    content: "",
-    id: "",
-  });
+  const copied = { ...isEditData };
+  const [editData, setEditData] = React.useState(copied);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditData({ ...editData, [e.target.id]: e.target.value });
+    if (e.target.id === "isCompleted") {
+      setEditData({ ...editData, [e.target.id]: e.target.checked });
+    } else setEditData({ ...editData, [e.target.id]: e.target.value });
   };
   // 할 일 수정(update) 핸들러
   const handleSubmit = async () => {
-    const res = await Api.put(`http://localhost:8080/todos/${editData.id}`, {
-      title: editData.title,
-      content: editData.content,
+    console.log(editData);
+    const res = await Api.put(`todos/${editData.id}`, {
+      todo: editData.todo,
+      isCompleted: editData.isCompleted,
     });
-    await handleEdit(
-      res.data.data.title,
-      res.data.data.content,
-      res.data.data.id
-    );
+    await handleEdit(res.data);
     await handleEditClick();
   };
-
-  useEffect(() => {
-    const updateData = async () => {
-      const copied = { ...isEditData };
-      await setEditData(copied);
-    };
-    updateData();
-  }, []);
 
   return (
     <Container>
       <Form>
+        <div>
+          <div>완료 상태</div>
+          <input
+            id="isCompleted"
+            type="checkbox"
+            checked={editData.isCompleted && true}
+            onChange={handleChange}
+          />
+        </div>
         <div>Task title</div>
         <input
-          id="title"
+          id="todo"
           type="text"
-          value={editData.title}
+          value={editData.todo}
           onChange={handleChange}
         />
-        <div>Description</div>
-        <input
-          id="content"
-          type="text"
-          value={editData.content}
-          onChange={handleChange}
-        />
-        <div>
+
+        <ButtonGroup>
           <button onClick={handleSubmit}>Edit</button>
           <button onClick={() => handleEditClick()}>취소</button>
-        </div>
+        </ButtonGroup>
       </Form>
     </Container>
   );
@@ -80,10 +72,6 @@ const Container = styled.div`
   height: 100%;
   border: 2px solid red;
   background-color: rgba(0, 0, 0, 0.5);
-`;
-
-const Form = styled.div`
-  background-color: white;
 `;
 
 export default ToDoEditForm;
