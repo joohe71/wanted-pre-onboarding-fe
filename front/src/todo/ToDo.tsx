@@ -10,24 +10,22 @@ import ToDoSkeleton from "../ToDoSkeleton";
 const ToDoList = lazy(() => import("./ToDoList"));
 
 export type ToDoData = {
-  title: string;
-  content: string;
-  id: string;
-};
+  todo: string;
+  isCompleted: boolean;
+  id: Number;
+  userId: Number;
+} | null;
 export interface ToDoProps {
-  todos: { title: string; content: string; id: string }[];
+  todos: { todo: string; isCompleted: boolean; id: Number; userId: Number }[];
   handleDelete: (item: ToDoData) => void;
   handleEditClick: (item?: ToDoData) => void;
+  handleEdit: (item: ToDoData) => void;
 }
 
 const ToDo = () => {
   const [isClicked, setIsClicked] = React.useState(false);
   const [isEdited, setIsEdited] = React.useState(false);
-  const [isEditData, setIsEditData] = React.useState<ToDoData>({
-    title: "",
-    content: "",
-    id: "",
-  });
+  const [isEditData, setIsEditData] = React.useState<ToDoData>(null);
   const [todos, setTodos] = React.useState<ToDoProps["todos"]>([]);
 
   const handleAdd = () => setIsClicked((prev) => !prev);
@@ -39,38 +37,34 @@ const ToDo = () => {
     }
   };
 
-  const handleUpdate = (title: string, content: string, id: string) => {
+  const handleUpdate = (data: ToDoData) => {
     const copied = [...todos];
-    copied.push({ title, content, id });
+    data !== null && copied.push(data);
 
     setTodos(copied);
   };
 
-  const handleEdit = (title: string, content: string, id: string) => {
+  const handleEdit = (data: ToDoData) => {
     const copied = [...todos];
-    const index = copied.findIndex((item) => item.id === id);
-    copied[index] = { title, content, id };
+    const index = copied.findIndex((item) => item.id === data?.id);
+    copied[index] = { ...copied[index], ...data };
     setTodos(copied);
   };
 
   const handleDelete = async (item: any) => {
-    await Api.delete(`http://localhost:8080/todos/${item.id}`);
-    const copied = [...todos];
-    await copied.splice(todos.indexOf(item), 1);
-    await setTodos(copied);
+    const question = window.confirm("정말 삭제하시겠습니까?");
+    if (question) {
+      await Api.delete(`todos/${item.id}`);
+      const copied = [...todos];
+      await copied.splice(todos.indexOf(item), 1);
+      await setTodos(copied);
+    }
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await Api.get("http://localhost:8080/todos");
-      console.log(res.data.data);
-      await setTodos(
-        res.data.data.map((todo: any) => ({
-          title: todo.title,
-          content: todo.content,
-          id: todo.id,
-        }))
-      );
+      const res = await Api.get("todos");
+      await setTodos(res.data);
     };
     fetchData();
   }, []);
@@ -106,6 +100,7 @@ const ToDo = () => {
                 todos={todos}
                 handleDelete={handleDelete}
                 handleEditClick={handleEditClick}
+                handleEdit={handleEdit}
               />
             </Suspense>
           </Ul>

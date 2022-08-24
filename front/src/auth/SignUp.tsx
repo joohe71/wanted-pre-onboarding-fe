@@ -46,7 +46,7 @@ const SignUp = () => {
             />
           </Col>
           <div>
-            <a onClick={() => navigate("/login")}>로그인</a>
+            <a onClick={() => navigate("/")}>로그인</a>
           </div>
 
           <button

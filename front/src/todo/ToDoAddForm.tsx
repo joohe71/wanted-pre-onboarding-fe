@@ -1,29 +1,27 @@
 import * as Api from "../api/Api";
 import React from "react";
 import styled from "styled-components";
+import { ToDoData } from "./ToDo";
 
 interface ToDoAddFormProps {
   handleAdd: () => void;
-  handleUpdate: (title: string, content: string, id: string) => void;
+  handleUpdate: (data: ToDoData) => void;
 }
 
 // 새로운 할일을 추가하는 폼을 보여주는 컴포넌트
 const ToDoAddForm = ({ handleAdd, handleUpdate }: ToDoAddFormProps) => {
   // ToDoAddForm의 데이터 상태를 저장하는 변수
-  const [addData, setAddData] = React.useState({ title: "", content: "" });
+  const [addData, setAddData] = React.useState({ todo: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddData({ ...addData, [e.target.id]: e.target.value });
   };
   // 할 일 추가 핸들러
   const handleSubmit = async () => {
-    const res = await Api.post("http://localhost:8080/todos", addData);
+    const res = await Api.post("todos", addData);
+    console.log(res);
 
-    await handleUpdate(
-      res.data.data.title,
-      res.data.data.content,
-      res.data.data.id
-    );
+    await handleUpdate(res.data);
     await handleAdd();
   };
   return (
@@ -31,22 +29,15 @@ const ToDoAddForm = ({ handleAdd, handleUpdate }: ToDoAddFormProps) => {
       <Form>
         <div>Task title</div>
         <input
-          id="title"
+          id="todo"
           type="text"
-          value={addData.title}
+          value={addData.todo}
           onChange={handleChange}
         />
-        <div>Description</div>
-        <input
-          id="content"
-          type="text"
-          value={addData.content}
-          onChange={handleChange}
-        />
-        <div>
+        <ButtonGroup>
           <button onClick={handleSubmit}>Add</button>
           <button onClick={handleAdd}>취소</button>
-        </div>
+        </ButtonGroup>
       </Form>
     </Container>
   );
@@ -63,8 +54,18 @@ const Container = styled.div`
   background-color: rgba(0, 0, 0, 0.5);
 `;
 
-const Form = styled.div`
+export default ToDoAddForm;
+
+export const Form = styled.div`
   background-color: white;
+  width: 300px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 10px;
 `;
 
-export default ToDoAddForm;
+export const ButtonGroup = styled.div`
+  text-align: right;
+`;
