@@ -36,7 +36,7 @@ const Login = () => {
           </Col>
           <div>
             이 사이트가 처음이신가요?
-            <a onClick={() => navigate("/register")}> 회원가입</a>
+            <A onClick={() => navigate("/register")}> 회원가입</A>
           </div>
 
           <button
@@ -87,6 +87,13 @@ const Form = styled.form`
 const Col = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+const A = styled.a`
+  cursor: pointer;
+  &:hover {
+    font-weight: bold;
+  }
 `;
 
 export default Login;
