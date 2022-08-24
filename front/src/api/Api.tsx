@@ -2,8 +2,9 @@ import axios from "axios";
 
 const token = `Bearer ${localStorage.getItem("token")}`;
 
+const serverUrl = `https://5co7shqbsf.execute-api.ap-northeast-2.amazonaws.com/production/`;
 const get = (endpoint: string) => {
-  return axios.get(endpoint, {
+  return axios.get(serverUrl + endpoint, {
     headers: {
       Authorization: token,
     },
@@ -12,7 +13,7 @@ const get = (endpoint: string) => {
 
 const post = (endpoint: string, data: any) => {
   const bodyData = JSON.stringify(data);
-  return axios.post(endpoint, bodyData, {
+  return axios.post(serverUrl + endpoint, bodyData, {
     headers: {
       "Content-Type": "application/json",
       Authorization: token,
@@ -22,7 +23,7 @@ const post = (endpoint: string, data: any) => {
 
 const put = (endpoint: string, data: any) => {
   const bodyData = JSON.stringify(data);
-  return axios.put(endpoint, bodyData, {
+  return axios.put(serverUrl + endpoint, bodyData, {
     headers: {
       "Content-Type": "application/json",
       Authorization: token,
@@ -31,7 +32,7 @@ const put = (endpoint: string, data: any) => {
 };
 
 const del = (endpoint: string) => {
-  return axios.delete(endpoint, {
+  return axios.delete(serverUrl + endpoint, {
     headers: {
       Authorization: token,
     },
